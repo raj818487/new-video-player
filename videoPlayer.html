@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube HLS Stream Player with Plyr and hls.js</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Plyr CSS -->
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.6.4/plyr.css" />
+    <style>
+        body {
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .video-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .plyr {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .seek-buttons {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .seek-buttons .btn {
+            margin-right: 5px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group input {
+            border-radius: 20px 0 0 20px;
+            border-color: #ccc;
+            box-shadow: none;
+        }
+        .input-group button {
+            border-radius: 0 20px 20px 0;
+            box-shadow: none;
+        }
+        .btn-primary {
+            background-color: #6c63ff;
+            border-color: #6c63ff;
+        }
+        .btn-primary:hover {
+            background-color: #564ee8;
+            border-color: #564ee8;
+        }
+        h1{
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1 >Video Player</h1>
+
+<div class="container">
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" id="streamUrlInput" placeholder="Enter HLS stream URL">
+        <button class="btn btn-primary" type="button" id="loadStreamButton">Load Stream</button>
+    </div>
+
+    <div class="seek-buttons">
+        <button type="button" class="btn btn-light" id="seekBackwardButton">Seek Backward 10s</button>
+        <button type="button" class="btn btn-light" id="seekForwardButton">Seek Forward 10s</button>
+    </div>
+
+    <div class="video-container">
+        <video id="hls_video_player" controls crossorigin class="plyr">
+            <source src="" type="application/x-mpegURL">
+        </video>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Plyr JS -->
+<script src="https://cdn.plyr.io/3.6.4/plyr.polyfilled.js"></script>
+<!-- hls.js -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+    (function (window, Plyr, Hls) {
+        var player;
+
+        function loadStream() {
+            var streamUrl = document.getElementById('streamUrlInput').value;
+            if (streamUrl) {
+                if (player) {
+                    player.destroy();
+                }
+                player = new Plyr('#hls_video_player', {
+                    controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen', 'settings', 'pip', 'airplay', 'captions', 'speed']
+                });
+
+                if (Hls.isSupported()) {
+                    var hls = new Hls();
+                    hls.loadSource(streamUrl);
+                    hls.attachMedia(player.media);
+                    hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                        player.play();
+                    });
+                } else if (player.media.canPlayType('application/vnd.apple.mpegurl')) {
+                    player.media.src = streamUrl;
+                    player.play();
+                }
+
+            } else {
+                alert("Please enter a valid HLS stream URL.");
+            }
+        }
+
+        document.getElementById('loadStreamButton').addEventListener('click', loadStream);
+
+        // Seek forward button functionality for Plyr player
+        document.getElementById('seekForwardButton').addEventListener('click', function () {
+            if (player) {
+                player.currentTime += 10;
+            }
+        });
+
+        // Seek backward button functionality for Plyr player
+        document.getElementById('seekBackwardButton').addEventListener('click', function () {
+            if (player) {
+                player.currentTime -= 10;
+            }
+        });
+
+    })(window, Plyr, Hls);
+</script>
+
+
+</script>
+</body>
+</html>
